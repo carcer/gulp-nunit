@@ -1,0 +1,14 @@
+{
+  "name": "gulp-nunit",
+  "version": "0.0.1",
+  "description": "nunit test runner for gulp",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine-node test.js --matchall"
+  },
+  "keywords": [
+    "gulpplugin"
+  ],
+  "author": "= <chris@e4ums.co.uk>",
+  "license": "MIT"
+}
