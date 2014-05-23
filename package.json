@@ -1,0 +1,31 @@
+{
+    "name": "gulp-nunit",
+    "version": "0.0.1",
+    "description": "nunit test runner for gulp",
+    "main": "index.js",
+    "scripts": {
+        "test": "jasmine-node test.js --matchall"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/carcer/gulp-nunit"
+    },
+    "bugs": {
+        "url": "https://github.com/carcer/gulp-nunit/issues"
+    },
+    "keywords": [
+        "gulpplugin"
+    ],
+    "author": "Chris Canal <chris@e4ums.co.uk>",
+    "license": "MIT",
+    "dependencies": {
+        "gulp-util": "^2.2.14",
+        "lodash": "^2.4.1",
+        "through2": "^0.4.2"
+    },
+    "devDependencies": {
+        "event-stream": "^3.1.5",
+        "jasmine-node": "^1.14.3",
+        "mocha": "^1.19.0"
+    }
+}
