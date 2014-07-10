@@ -1,47 +1,61 @@
 'use strict';
 
 var gutil = require('gulp-util'),
-    through = require('through2'),
-    exec = require('child_process').exec,
-    _ = require('lodash');
+	through = require('through2'),
+	exec = require('child_process').exec,
+	_ = require('lodash');
 
 var pluginName = 'gulp-nunit';
 
-function nunit(options){
-    return through.obj(function(file, enc, callback) {
-        if (!options.command) {
-            this.emit('error', new gutil.PluginError(pluginName, 'command is required'))
-            return callback();
-        }
-        if (!options.assemblies) {
-            this.emit('error', new gutil.PluginError(pluginName, 'assemblies is required'))
-            return callback();
-        }
+function nunit(options) {
+	if (!options.command) {
+		throw new gutil.PluginError(pluginName, 'command is required');
+	}
 
-        var commandParamaters = [];
+	var assemblies = [];
 
-        commandParamaters.push('"' + options.command + '"');
-        commandParamaters.push(options.assemblies.join(' '));
-        commandParamaters.push(options.options);
+	function collectAssemblies(file, enc, callback) {
 
-        var fail = _.bind(function() {
-            this.emit('error', new gutil.PluginError(pluginName, 'tests failed'))
-        }, this);
+		assemblies.push(file.path);
+		return callback();
+	}
 
-        var cp = exec(commandParamaters.join(' '), [], function(err) {
-            if(err){
-                gutil.log(gutil.colors.red('Failed!'));
-                fail();
-            }else{
-                gutil.log(gutil.colors.cyan('Passed!'));
-            }
+	function flushStream() {
 
-            return callback();
-        });
+		var fail = _.bind(function () {
+			this.emit('error', new gutil.PluginError(pluginName, 'tests failed'))
+		}, this);
+		var end = _.bind(function () {
+			this.emit('end');
+		}, this);
 
-        cp.stdout.pipe(process.stdout);
-        cp.stderr.pipe(process.stderr);
-    });
+		if (assemblies.length === 0) {
+			this.emit('error', new gutil.PluginError(pluginName, 'assemblies is required'))
+			return this.emit('end');
+		}
+
+		var commandParamaters = [];
+
+		commandParamaters.push('"' + options.command + '"');
+		commandParamaters.push(options.options);
+		commandParamaters.push(assemblies.join(' '));
+
+
+		var cp = exec(commandParamaters.join(' '), [], function (err) {
+			if (err) {
+				gutil.log(gutil.colors.red('Failed!'));
+				fail();
+			} else {
+				gutil.log(gutil.colors.cyan('Passed!'));
+			}
+			end();
+		});
+
+		cp.stdout.pipe(process.stdout);
+		cp.stderr.pipe(process.stderr);
+	};
+
+	return through.obj(collectAssemblies, flushStream);
 };
 
 module.exports = nunit;
