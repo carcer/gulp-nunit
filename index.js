@@ -1,9 +1,9 @@
 'use strict';
 
 var gutil = require('gulp-util'),
-	through = require('through2'),
 	exec = require('child_process').exec,
-	_ = require('lodash');
+	_ = require('lodash'),
+	es = require('event-stream');
 
 var pluginName = 'gulp-nunit';
 
@@ -14,10 +14,8 @@ function nunit(options) {
 
 	var assemblies = [];
 
-	function collectAssemblies(file, enc, callback) {
-
+	function collectAssemblies(file /*, enc, callback*/) {
 		assemblies.push(file.path);
-		return callback();
 	}
 
 	function flushStream() {
@@ -31,7 +29,7 @@ function nunit(options) {
 
 		if (assemblies.length === 0) {
 			this.emit('error', new gutil.PluginError(pluginName, 'assemblies is required'))
-			return this.emit('end');
+			this.emit('end');
 		}
 
 		var commandParamaters = [];
@@ -55,7 +53,7 @@ function nunit(options) {
 		cp.stderr.pipe(process.stderr);
 	};
 
-	return through.obj(collectAssemblies, flushStream);
+	return es.through(collectAssemblies, flushStream);
 };
 
 module.exports = nunit;
